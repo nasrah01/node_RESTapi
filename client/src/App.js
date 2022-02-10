@@ -9,7 +9,7 @@ function App() {
   const onFormSubmit = async (e) => {
     e.preventDefault();
 
-     const response = await fetch("http://localhost:5000/api/users", {
+     const response = await fetch("http://localhost:5000/auth/users", {
        method: "POST",
        headers: {
          "Content-Type": "application/json",
