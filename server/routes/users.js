@@ -1,5 +1,6 @@
 import express, { application } from 'express'
 import { v4 as uuidv4 } from "uuid"; 
+import jwt from 'jsonwebtoken'
 import User from '../models/user.model.js'
 
 const router = express.Router();
@@ -15,7 +16,7 @@ router.post("/auth/users", async (req, res) => {
       userId: uuidv4(),
     });
     
-    res.json({ message: `${user.name} has been added to the user list` });
+    res.json({ status: 200 });
   } catch (error) {
     res.json({status: 'error'})
   }
@@ -23,15 +24,21 @@ router.post("/auth/users", async (req, res) => {
 });
 
 router.post('/auth/login', async (req, res) => {
-  try {
-    await User.findOne({
+    const user = await User.findOne({
       email: req.body.email,
       password: req.body.password
     })
-    res.json({message: 'found'})
-  } catch (error) {
-    res.json({message: 'error', error: 'email error'})
-  }
+
+    if(user) {
+      const token = jwt.sign({
+        name: user.name,
+        email: user.email
+      }, '54321')
+      
+      return res.json({status: 'ok', user: token})
+    } else {
+      return res.json({status: 'error', user: false})
+    }
 })
 
 
