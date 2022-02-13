@@ -27,6 +27,11 @@ const Signup = () => {
     if(data.status === 200) {
       navigate('/login')
     } 
+
+    if(data.status === 400) {
+      console.log(data.message)
+    }
+
     
   };
 
@@ -60,6 +65,7 @@ const Signup = () => {
         </div>
         <input type="submit" value="Sign Up" />
       </form>
+      <div></div>
     </div>
   );
 }
