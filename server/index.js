@@ -4,17 +4,29 @@ import bodyParser from 'body-parser';
 import usersRoutes from "./routes/users.js"
 import cors from "cors";
 import mongoose from 'mongoose'
+import cookieParser from 'cookie-parser';
 
 const app = express();
 const PORT = process.env.PORT;
-app.use(cors());
+app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(cors());
 
-mongoose.connect(process.env.DATABASE_URI);
+const connectDB = async() => {
+  await mongoose.connect(process.env.DATABASE_URI);
+  console.log('MongoDB connected')
+}
+connectDB()
+
+app.get('/', (req, res) => {
+  res.send('hello world');
+})
+
 app.use("/", usersRoutes);
 
-app.get("/", (req, res) => {
-  res.send("Homepage");
-});
+app.use((err, req, res, next) => {
+  console.log(err);
+  res.status(422).send({error: err.message});
+})
 
-app.listen(PORT, () => console.log(`Server on http://localhost:${PORT}`));
+app.listen(PORT || 4000, () => console.log(`Server on http://localhost:${PORT}`));

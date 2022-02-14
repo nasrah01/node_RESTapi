@@ -10,7 +10,7 @@ const Signup = () => {
   const onFormSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await fetch("http://localhost:5000/auth/users", {
+    const response = await fetch("http://localhost:5000/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -24,7 +24,7 @@ const Signup = () => {
 
     const data = await response.json();
 
-    if(data.status === 200) {
+    if(data.status === 201) {
       navigate('/login')
     } 
 
