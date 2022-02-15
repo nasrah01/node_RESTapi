@@ -1,12 +1,11 @@
 import express from 'express'
-import { v4 as uuidv4 } from "uuid"; 
-import jwt from 'jsonwebtoken'
-import User from '../models/Users.js'
 import "dotenv/config";
+import { v4 as uuidv4 } from "uuid"; 
+import User from '../models/Users.js'
 
 const router = express.Router();
 
-router.get("/auth/users", (req, res, next) => {
+router.get("/auth/users", (req, res) => {
   User.find().then((users) => {
     res.send(users)
     console.log(users)
@@ -14,62 +13,48 @@ router.get("/auth/users", (req, res, next) => {
 })
 
 router.post("/auth/register", async (req, res) => {
-  console.log(req.body);
+  const { name, email, password } = req.body;
 
   try {
     const user = await User.create({
-      name: req.body.name,
-      email: req.body.email,
-      password: req.body.password,
+      name,
+      email,
+      password,
       userId: uuidv4(),
     });
     
-    res.status(201).json({
-      sucess: true,
-      user
-    })
+    sendToken(user, 201, res);
   } catch (error) {
-    res.status(400).json({
-      sucess: false,
-      error: error.message
-    })
+    res.status(400).json({ sucess: false, error: "User has already been registered" })
   }
 
 });
 
 router.post('/auth/login', async (req, res) => {
-    const user = await User.findOne({
-      email: req.body.email,
-      password: req.body.password
-    }).lean();
+  const { email, password } = req.body;
 
-    // if not user if(!user) {json status user not found}
+  if(!email || !password) {
+    res.status(400).json({ success: false, error: "Please enter your email and password"})
+  }
 
-    //bcypt password then check the password
-
-    if(user) {
-      const accessToken = jwt.sign({
-        name: user.name,
-        email: user.email
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      {expiresIn:'5m'} 
-      )
-
-      const refreshToken = jwt.sign(
-        {
-          name: user.name,
-          email: user.email,
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: "1d" }
-      );
-
-      res.cookie('jwt', refreshToken, {httpOnly: true, maxAge: 24 * 60 * 60 * 1000})
-      res.json({status: 'ok', user: accessToken})
-    } else {
-      res.json({status: 'error', user: false})
+  try {
+    const user = await User.findOne({email}).select("+password");
+    if(!user) {
+      res.status(404).json({success: false, error: "Invalid User"})
     }
+
+    const passwordMatch = await user.matchPasswords(password);
+    if(!passwordMatch) {
+      res.status(404).json({success: false, error: "Invalid Password"})
+    }
+
+    sendToken(user, 201, res)
+    
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message })
+  }
+
+
 })
 
 router.put("/auth/users/:id", (req, res, next) => {
@@ -85,5 +70,10 @@ router.delete("/auth/users/:id", (req, res) => {
     res.send(user);
   });
 })
+
+const sendToken = (user, statusCode, res) => {
+  const token = user.getSignedToken();
+  res.status(statusCode).json({success: true, token})
+}
 
 export default router;

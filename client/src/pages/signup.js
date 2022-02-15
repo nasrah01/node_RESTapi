@@ -24,7 +24,7 @@ const Signup = () => {
 
     const data = await response.json();
 
-    if(data.status === 201) {
+    if(data.status === 200) {
       navigate('/login')
     } 
 
