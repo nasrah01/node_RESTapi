@@ -1,10 +1,11 @@
 import express from 'express';
 import 'dotenv/config'
 import bodyParser from 'body-parser';
-import usersRoutes from "./routes/users.js"
 import cors from "cors";
 import mongoose from 'mongoose'
 import cookieParser from 'cookie-parser';
+import usersRoutes from "./routes/users.js"
+import privateRoutes from './routes/auth.js'
 
 const app = express();
 const PORT = process.env.PORT;
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 })
 
 app.use("/", usersRoutes);
+app.use("/", privateRoutes);
 
 app.use((err, req, res, next) => {
   console.log(err);
