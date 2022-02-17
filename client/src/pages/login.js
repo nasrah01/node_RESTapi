@@ -1,33 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from 'axios';
+import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    if(localStorage.getItem("authToken")) {
+      navigate("/dashboard")
+    }
+  }, [navigate])
 
   const onFormSubmit = async (e) => {
     e.preventDefault();
-
-    const response = await fetch("http://localhost:5000/auth/login", {
-      method: "POST",
-      headers: {
+    const config = {
+      header: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
+    };
 
-        email,
-        password,
-      }),
-    })
+    try {
+      const { data } = await axios.post(
+        "http://localhost:5000/auth/login",
+        { email, password },
+        config
+      );
 
-    
+      localStorage.setItem("authToken", data.token);
 
-    const data = await response.json();
-console.log(response.json)
-    if(data.user) {
-      console.log('login successful')
-      window.location.href = '/intranet'
-    } else {
-      console.log(data.user)
+      navigate("/dashboard");
+    } catch (error) {
+      setError(error.response.data.error);
     }
   };
 
@@ -52,7 +58,11 @@ console.log(response.json)
           />
         </div>
         <input type="submit" value="login" />
+        <div>{error && <span>{error}</span>}</div>
       </form>
+      <span>
+        Don't have an account? <Link to="/login">Sign up</Link>
+      </span>
     </div>
   );
 };

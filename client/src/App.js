@@ -4,7 +4,7 @@ import Login from './pages/login'
 import Signup from './pages/signup'
 import Home from './pages/home'
 import Error from './pages/error'
-import Intranet from './pages/intranet'
+import Dashboard from './pages/dashboard'
 
 const App = () => {
   return (
@@ -13,7 +13,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/intranet" element={<Intranet />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="*" element={<Error />} />
       </Routes>
     </Router>

@@ -24,6 +24,7 @@ router.post("/auth/register", async (req, res) => {
     });
     
     sendToken(user, 201, res);
+    
   } catch (error) {
     res.status(400).json({ sucess: false, error: "User has already been registered" })
   }

@@ -1,38 +1,39 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from 'axios'
 
 const Signup = () => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
   let navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem("authToken")) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const onFormSubmit = async (e) => {
     e.preventDefault();
-
-    const response = await fetch("http://localhost:5000/auth/register", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const config = {
+      header: {
+        "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        name,
-        email,
-        password,
-      }),
-    });
+    };
 
-    const data = await response.json();
+   try {
+     const { data } = await axios.post("http://localhost:5000/auth/register", {name, email, password}, config);
+     
+     localStorage.setItem("authToken", data.token);
 
-    if(data.status === 200) {
-      navigate('/login')
-    } 
+     navigate("/login");
 
-    if(data.status === 400) {
-      console.log(data.message)
-    }
+   } catch (error) {
+     setError(error.response.data.error);
+   }
 
-    
   };
 
   return (
@@ -64,8 +65,9 @@ const Signup = () => {
           />
         </div>
         <input type="submit" value="Sign Up" />
+        <div>{error && <span>{error}</span>}</div>
       </form>
-      <div></div>
+      <span>Already have an account? <Link to="/login">Login</Link></span>
     </div>
   );
 }

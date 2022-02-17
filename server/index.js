@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
 })
 
 app.use("/", usersRoutes);
-app.use("/", privateRoutes);
+app.use("/auth/private", privateRoutes);
 
 app.use((err, req, res, next) => {
   console.log(err);
